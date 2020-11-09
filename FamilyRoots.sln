@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FamilyRoots.Cli", "FamilyRoots.Cli\FamilyRoots.Cli.csproj", "{A6421520-FBA3-4C3F-877C-D2C83E6AB462}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FamilyRoots.Data", "FamilyRoots.Data\FamilyRoots.Data.csproj", "{775D0916-0B47-40D3-8C28-3E99E2073FAC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A6421520-FBA3-4C3F-877C-D2C83E6AB462}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6421520-FBA3-4C3F-877C-D2C83E6AB462}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6421520-FBA3-4C3F-877C-D2C83E6AB462}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6421520-FBA3-4C3F-877C-D2C83E6AB462}.Release|Any CPU.Build.0 = Release|Any CPU
+		{775D0916-0B47-40D3-8C28-3E99E2073FAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{775D0916-0B47-40D3-8C28-3E99E2073FAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{775D0916-0B47-40D3-8C28-3E99E2073FAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{775D0916-0B47-40D3-8C28-3E99E2073FAC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
