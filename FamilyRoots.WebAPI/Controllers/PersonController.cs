@@ -25,7 +25,7 @@ namespace FamilyRoots.WebAPI.Controllers
             var rng = new Random();
             return Enumerable
                 .Range(1, 5)
-                .Select(index => new Person())
+                .Select(index => new Person($"surname{index}"))
                 .ToArray();
         }
     }

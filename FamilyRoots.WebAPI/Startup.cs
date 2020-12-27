@@ -18,6 +18,8 @@ namespace FamilyRoots.WebAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddSwaggerGen();
+            services.AddRouting(options => options.LowercaseUrls = true);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -26,9 +28,15 @@ namespace FamilyRoots.WebAPI
             {
                 app.UseDeveloperExceptionPage();
             }
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                c.RoutePrefix = string.Empty;
+            });
             app.UseHttpsRedirection();
             app.UseRouting();
-            app.UseAuthorization();
+            //app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
