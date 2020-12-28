@@ -4,14 +4,26 @@ namespace FamilyRoots.Data
 {
     public class Person
     {
-        public Person(string surname, params string[] names)
-        {
-            Surname = surname;
-            Names = names;
-        }
+        public long Id { get; set; }
+        
+        public string Surname { get; set; }
+        
+        public string[] Names { get; set; }
+        
+        public Sex Sex { get; set; }
+        
+        public DateTime? BirthDate { get; set; }
 
-        public string Surname { get; }
-        public string[] Names { get; }
-        public DateTime BirthDate { get; set; }
+        public string BirthPlace { get; set; }
+        
+        public DateTime? DeathDate { get; set; }
+     
+        public string BurialPlace { get; set; }
+    }
+
+    public enum Sex
+    {
+        Male,
+        Female
     }
 }
