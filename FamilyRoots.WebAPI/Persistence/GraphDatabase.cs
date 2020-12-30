@@ -15,6 +15,8 @@ namespace FamilyRoots.WebAPI.Persistence
         Task<Person> GetPersonAsync(Guid uuid);
         Task<IEnumerable<Person>> CreatePeopleAsync(ImmutableList<CreatePersonRequest> newPeople);
         Task<IEnumerable<Person>> UpdatePeopleAsync(ImmutableList<UpdatePersonRequest> updatedPeople);
+        Task DeletePeopleAsync();
+        Task DeletePersonAsync(Guid uuid);
     }
     
     public class GraphDatabase : IGraphDatabase

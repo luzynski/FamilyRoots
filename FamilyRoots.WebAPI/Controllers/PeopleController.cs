@@ -51,32 +51,48 @@ namespace FamilyRoots.WebAPI.Controllers
             return await _database.UpdatePeopleAsync(updatedPeople);
         }
         
+        //[ApiExplorerSettings(IgnoreApi = true)]
+        [HttpDelete]
+        [Route("v1/people")]
+        public async Task DeleteAsync()
+        {
+            await _database.DeletePeopleAsync();
+        }
+        
+        //[ApiExplorerSettings(IgnoreApi = true)]
+        [HttpDelete]
+        [Route("v1/people/{id:guid}")]
+        public async Task DeleteAsync(Guid id)
+        {
+            await _database.DeletePersonAsync(id);
+        }
+        
         [HttpPost]
-        [Route("v1/people/{father-id}/is-father-of/{child-id}")]
-        public Person CreatePaternityRelation(string fatherId, string childId)
+        [Route("v1/people/{father-id:guid}/is-father-of/{child-id:guid}")]
+        public Person CreatePaternityRelation(Guid fatherId, Guid childId)
         {
             throw new NotImplementedException();
         }
         
         [HttpPost]
         [Route("v1/people/{mother-uuid}/is-mother-of/{child-id}")]
-        public Person CreateMaternityRelation(string motherId, string childId)
+        public Person CreateMaternityRelation(Guid motherId, Guid childId)
         {
             throw new NotImplementedException();
         }
         
         [HttpPut]
         [Route("v1/people/{first-party-id}/married/{second-party-id}")]
-        public Person CreateMarriageRelation(string firstPartyId, string secondPartyId, DateTime? date)
+        public Person CreateMarriageRelation(Guid firstPartyId, Guid secondPartyId, DateTime? date)
         {
             throw new NotImplementedException();
         }
         
-        //[HttpPut]
-        //[Route("v1/people/{first-party-id}/divorced/{second-party-id}")]
-        //public Person CreateMarriageRelation(string firstPartyId, string secondPartyId, DateTime? date)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        [HttpPut]
+        [Route("v1/people/{first-party-id}/divorced/{second-party-id}")]
+        public Person CreateDivorceRelation(Guid firstPartyId, Guid secondPartyId, DateTime? date)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
