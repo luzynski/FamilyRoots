@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading.Tasks;
 using FamilyRoots.Data;
 using FamilyRoots.Data.Requests;
@@ -30,25 +31,24 @@ namespace FamilyRoots.WebAPI.Controllers
         }
         
         [HttpGet]
-        [Route("v1/people/{id}")]
-        public async Task<Person> GetAsync(string id)
+        [Route("v1/people/{id:guid}")]
+        public async Task<Person> GetAsync(Guid id)
         {
-            var uuid = Guid.Parse(id);
-            return await _database.GetPersonAsync(uuid);
+            return await _database.GetPersonAsync(id);
         }
         
         [HttpPost]
         [Route("v1/people")]
-        public async Task<Guid> Create(CreatePersonRequest newPerson)
+        public async Task<IEnumerable<Person>> Create(ImmutableList<CreatePersonRequest> newPeople)
         {
-            return await _database.CreatePersonAsync(newPerson);
+            return await _database.CreatePeopleAsync(newPeople);
         }
         
         [HttpPut]
-        [Route("v1/people/{id}")]
-        public Person Update(string id, UpdatePersonRequest updatedPerson)
+        [Route("v1/people")]
+        public async Task<IEnumerable<Person>> Update(ImmutableList<UpdatePersonRequest> updatedPeople)
         {
-            throw new NotImplementedException();
+            return await _database.UpdatePeopleAsync(updatedPeople);
         }
         
         [HttpPost]
