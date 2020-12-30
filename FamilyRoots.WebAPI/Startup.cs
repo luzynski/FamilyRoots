@@ -1,8 +1,12 @@
+using FamilyRoots.WebAPI.Persistence;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Neo4j.Driver;
+using GraphDatabase = FamilyRoots.WebAPI.Persistence.GraphDatabase;
+using IApplicationLifetime = Microsoft.Extensions.Hosting.IApplicationLifetime;
 
 namespace FamilyRoots.WebAPI
 {
@@ -20,6 +24,11 @@ namespace FamilyRoots.WebAPI
             services.AddControllers();
             services.AddSwaggerGen();
             services.AddRouting(options => options.LowercaseUrls = true);
+            
+            services.AddSingleton(Neo4j.Driver.GraphDatabase.Driver(
+                "bolt://localhost:7687", 
+                AuthTokens.Basic("neo4j", "neo4j")));
+            services.AddSingleton<IGraphDatabase, GraphDatabase>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
