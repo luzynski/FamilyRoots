@@ -1,6 +1,10 @@
 using FamilyRoots.WebAPI.Persistence;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -24,6 +28,12 @@ namespace FamilyRoots.WebAPI
             services.AddControllers();
             services.AddSwaggerGen();
             services.AddRouting(options => options.LowercaseUrls = true);
+            services.AddApiVersioning(o => {
+                o.ReportApiVersions = true;
+                o.AssumeDefaultVersionWhenUnspecified = true;
+                o.DefaultApiVersion = new ApiVersion(1, 0);
+                o.ApiVersionReader = new MediaTypeApiVersionReader("v");
+            });
             
             services.AddSingleton(Neo4j.Driver.GraphDatabase.Driver(
                 "bolt://localhost:7687", 
