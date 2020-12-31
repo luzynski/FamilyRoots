@@ -24,9 +24,23 @@ namespace FamilyRoots.WebAPI.Controllers
 
         [HttpGet]
         [Route("v1/people")]
-        public async Task<IEnumerable<Person>> GetAsync([FromQuery(Name="guids:guid")] IReadOnlyList<Guid> guids)
+        public async Task<IEnumerable<Person>> GetAsync([FromQuery(Name="ids:guid")] IReadOnlyList<Guid> ids)
         {
-            return await _database.GetPeopleAsync(guids);
+            return await _database.GetPeopleAsync(ids);
+        }
+
+        [HttpGet]
+        [Route("v1/people/{child-id:guid}/father")]
+        public async Task<Person> GetFatherAsync([FromRoute(Name = "child-id")] Guid childId)
+        {
+            return await _database.GetFatherAsync(childId);
+        }
+
+        [HttpGet]
+        [Route("v1/people/{child-id:guid}/mother")]
+        public async Task<Person> GetMotherAsync([FromRoute(Name = "child-id")] Guid childId)
+        {
+            return await _database.GetMotherAsync(childId);
         }
         
         [HttpPost]
@@ -46,26 +60,40 @@ namespace FamilyRoots.WebAPI.Controllers
         //[ApiExplorerSettings(IgnoreApi = true)]
         [HttpDelete]
         [Route("v1/people")]
-        public async Task DeleteAsync([FromQuery(Name="guids:guid")] IReadOnlyList<Guid> guids)
+        public async Task DeleteAsync([FromQuery(Name="ids:guid")] IReadOnlyList<Guid> ids)
         {
-            await _database.DeletePeopleAsync(guids);
+            await _database.DeletePeopleAsync(ids);
         }
         
         [HttpPost]
         [Route("v1/people/{father-id:guid}/is-father-of/{child-id:guid}")]
-        public Person CreatePaternityRelation(Guid fatherId, Guid childId)
+        public async Task CreatePaternityRelationAsync([FromRoute(Name = "father-id")] Guid fatherId, [FromRoute(Name = "child-id")] Guid childId)
         {
-            throw new NotImplementedException();
+            await _database.CreatePaternityRelationAsync(fatherId, childId);
         }
         
         [HttpPost]
         [Route("v1/people/{mother-id:guid}/is-mother-of/{child-id:guid}")]
-        public Person CreateMaternityRelation(Guid motherId, Guid childId)
+        public async Task CreateMaternityRelationAsync([FromRoute(Name = "mother-id")] Guid motherId, [FromRoute(Name = "child-id")] Guid childId)
         {
-            throw new NotImplementedException();
+            await _database.CreateMaternityRelationAsync(motherId, childId);
         }
         
-        [HttpPut]
+        [HttpDelete]
+        [Route("v1/people/{father-id:guid}/is-father-of/{child-id:guid}")]
+        public async Task DeletePaternityRelationAsync([FromRoute(Name = "father-id")] Guid fatherId, [FromRoute(Name = "child-id")] Guid childId)
+        {
+            await _database.DeletePaternityRelationAsync(fatherId, childId);
+        }
+        
+        [HttpDelete]
+        [Route("v1/people/{mother-id:guid}/is-mother-of/{child-id:guid}")]
+        public async Task DeleteMaternityRelationAsync([FromRoute(Name = "mother-id")] Guid motherId, [FromRoute(Name = "child-id")] Guid childId)
+        {
+            await _database.DeleteMaternityRelationAsync(motherId, childId);
+        }
+        
+        /*[HttpPut]
         [Route("v1/people/{first-party-id:guid}/married/{second-party-id:guid}")]
         public Person CreateMarriageRelation(Guid firstPartyId, Guid secondPartyId, DateTime? date)
         {
@@ -77,6 +105,6 @@ namespace FamilyRoots.WebAPI.Controllers
         public Person CreateDivorceRelation(Guid firstPartyId, Guid secondPartyId, DateTime? date)
         {
             throw new NotImplementedException();
-        }
+        }*/
     }
 }
