@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Threading.Tasks;
 using FamilyRoots.Data;
 using FamilyRoots.Data.Requests;
@@ -25,28 +24,21 @@ namespace FamilyRoots.WebAPI.Controllers
 
         [HttpGet]
         [Route("v1/people")]
-        public async Task<IEnumerable<Person>> GetAsync()
+        public async Task<IEnumerable<Person>> GetAsync([FromQuery(Name="guids:guid")] IReadOnlyList<Guid> guids)
         {
-            return await _database.GetPeopleAsync();
-        }
-        
-        [HttpGet]
-        [Route("v1/people/{id:guid}")]
-        public async Task<Person> GetAsync(Guid id)
-        {
-            return await _database.GetPersonAsync(id);
+            return await _database.GetPeopleAsync(guids);
         }
         
         [HttpPost]
         [Route("v1/people")]
-        public async Task<IEnumerable<Person>> Create(ImmutableList<CreatePersonRequest> newPeople)
+        public async Task<IEnumerable<Person>> Create([FromBody] IReadOnlyList<CreatePersonRequest> newPeople)
         {
             return await _database.CreatePeopleAsync(newPeople);
         }
         
         [HttpPut]
         [Route("v1/people")]
-        public async Task<IEnumerable<Person>> Update(ImmutableList<UpdatePersonRequest> updatedPeople)
+        public async Task<IEnumerable<Person>> Update([FromBody] IReadOnlyList<UpdatePersonRequest> updatedPeople)
         {
             return await _database.UpdatePeopleAsync(updatedPeople);
         }
@@ -54,17 +46,9 @@ namespace FamilyRoots.WebAPI.Controllers
         //[ApiExplorerSettings(IgnoreApi = true)]
         [HttpDelete]
         [Route("v1/people")]
-        public async Task DeleteAsync()
+        public async Task DeleteAsync([FromQuery(Name="guids:guid")] IReadOnlyList<Guid> guids)
         {
-            await _database.DeletePeopleAsync();
-        }
-        
-        //[ApiExplorerSettings(IgnoreApi = true)]
-        [HttpDelete]
-        [Route("v1/people/{id:guid}")]
-        public async Task DeleteAsync(Guid id)
-        {
-            await _database.DeletePersonAsync(id);
+            await _database.DeletePeopleAsync(guids);
         }
         
         [HttpPost]
@@ -75,21 +59,21 @@ namespace FamilyRoots.WebAPI.Controllers
         }
         
         [HttpPost]
-        [Route("v1/people/{mother-uuid}/is-mother-of/{child-id}")]
+        [Route("v1/people/{mother-id:guid}/is-mother-of/{child-id:guid}")]
         public Person CreateMaternityRelation(Guid motherId, Guid childId)
         {
             throw new NotImplementedException();
         }
         
         [HttpPut]
-        [Route("v1/people/{first-party-id}/married/{second-party-id}")]
+        [Route("v1/people/{first-party-id:guid}/married/{second-party-id:guid}")]
         public Person CreateMarriageRelation(Guid firstPartyId, Guid secondPartyId, DateTime? date)
         {
             throw new NotImplementedException();
         }
         
         [HttpPut]
-        [Route("v1/people/{first-party-id}/divorced/{second-party-id}")]
+        [Route("v1/people/{first-party-id:guid}/divorced/{second-party-id:guid}")]
         public Person CreateDivorceRelation(Guid firstPartyId, Guid secondPartyId, DateTime? date)
         {
             throw new NotImplementedException();

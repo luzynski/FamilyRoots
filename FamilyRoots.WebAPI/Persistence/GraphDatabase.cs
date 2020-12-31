@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using FamilyRoots.Data;
@@ -11,12 +10,10 @@ namespace FamilyRoots.WebAPI.Persistence
 {
     public interface IGraphDatabase
     {
-        Task<IEnumerable<Person>> GetPeopleAsync();
-        Task<Person> GetPersonAsync(Guid uuid);
-        Task<IEnumerable<Person>> CreatePeopleAsync(ImmutableList<CreatePersonRequest> newPeople);
-        Task<IEnumerable<Person>> UpdatePeopleAsync(ImmutableList<UpdatePersonRequest> updatedPeople);
-        Task DeletePeopleAsync();
-        Task DeletePersonAsync(Guid uuid);
+        Task<IEnumerable<Person>> GetPeopleAsync(IReadOnlyList<Guid> guids);
+        Task<IEnumerable<Person>> CreatePeopleAsync(IReadOnlyList<CreatePersonRequest> newPeople);
+        Task<IEnumerable<Person>> UpdatePeopleAsync(IReadOnlyList<UpdatePersonRequest> updatedPeople);
+        Task DeletePeopleAsync(IReadOnlyList<Guid> guids);
     }
     
     public class GraphDatabase : IGraphDatabase
@@ -28,12 +25,15 @@ namespace FamilyRoots.WebAPI.Persistence
             _driver = driver;
         }
 
-        public async Task<IEnumerable<Person>> GetPeopleAsync()
+        public async Task<IEnumerable<Person>> GetPeopleAsync(IReadOnlyList<Guid> guids)
         {
             var session = _driver.AsyncSession();
             try
             {
-                var cursor = await session.RunAsync("MATCH (p:Person) RETURN p");
+                var queryCondition = guids.Any()
+                    ? $"WHERE p.id IN ['{string.Join("','", guids)}'] "
+                    : "";
+                var cursor = await session.RunAsync($"MATCH (p:Person) {queryCondition}RETURN p");
                 return await cursor.ToListAsync(record => record["p"].As<INode>().ToPerson());
             }
             finally
@@ -42,22 +42,7 @@ namespace FamilyRoots.WebAPI.Persistence
             }
         }
 
-        public async Task<Person> GetPersonAsync(Guid uuid)
-        {
-            var session = _driver.AsyncSession();
-            try
-            {
-                var cursor = await session.RunAsync($"MATCH (p:Person) WHERE p.id = '{uuid}' RETURN p");
-                var people = await cursor.ToListAsync(record => record["p"].As<INode>().ToPerson());
-                return people.Single();
-            }
-            finally
-            {
-                await session.CloseAsync();
-            }
-        }
-
-        public async Task<IEnumerable<Person>> CreatePeopleAsync(ImmutableList<CreatePersonRequest> newPeople)
+        public async Task<IEnumerable<Person>> CreatePeopleAsync(IReadOnlyList<CreatePersonRequest> newPeople)
         {
             var session = _driver.AsyncSession();
             try
@@ -78,7 +63,7 @@ namespace FamilyRoots.WebAPI.Persistence
             }
         }
         
-        public async Task<IEnumerable<Person>> UpdatePeopleAsync(ImmutableList<UpdatePersonRequest> updatedPeople)
+        public async Task<IEnumerable<Person>> UpdatePeopleAsync(IReadOnlyList<UpdatePersonRequest> updatedPeople)
         {
             var session = _driver.AsyncSession();
             try
@@ -99,25 +84,15 @@ namespace FamilyRoots.WebAPI.Persistence
             }
         }
         
-        public async Task DeletePeopleAsync()
+        public async Task DeletePeopleAsync(IReadOnlyList<Guid> guids)
         {
             var session = _driver.AsyncSession();
             try
             {
-                await session.RunAsync("MATCH (p:Person) DETACH DELETE p");
-            }
-            finally
-            {
-                await session.CloseAsync();
-            }
-        }
-
-        public async Task DeletePersonAsync(Guid uuid)
-        {
-            var session = _driver.AsyncSession();
-            try
-            {
-                await session.RunAsync($"MATCH (p:Person) WHERE p.id = '{uuid}' DETACH DELETE p");
+                var queryCondition = guids.Any()
+                    ? $"WHERE p.id IN ['{string.Join("','", guids)}'] "
+                    : "";
+                await session.RunAsync($"MATCH (p:Person) {queryCondition}DETACH DELETE p");
             }
             finally
             {
