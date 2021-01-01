@@ -66,31 +66,33 @@ namespace FamilyRoots.WebAPI.Controllers
         }
         
         [HttpPost]
-        [Route("v1/people/{father-id:guid}/is-father-of/{child-id:guid}")]
+        [Route("v1/people/{child-id:guid}/father/{father-id:guid}")]
         public async Task CreatePaternityRelationAsync([FromRoute(Name = "father-id")] Guid fatherId, [FromRoute(Name = "child-id")] Guid childId)
         {
             await _database.CreatePaternityRelationAsync(fatherId, childId);
         }
         
         [HttpPost]
-        [Route("v1/people/{mother-id:guid}/is-mother-of/{child-id:guid}")]
-        public async Task CreateMaternityRelationAsync([FromRoute(Name = "mother-id")] Guid motherId, [FromRoute(Name = "child-id")] Guid childId)
+        [Route("v1/people/{child-id:guid}/mother/{mother-id:guid}")]
+        public async Task CreateMaternityRelationAsync([FromRoute(Name = "child-id")] Guid childId, [FromRoute(Name = "mother-id")] Guid motherId)
         {
-            await _database.CreateMaternityRelationAsync(motherId, childId);
+            await _database.CreateMaternityRelationAsync(childId, motherId);
         }
         
+        //[ApiExplorerSettings(IgnoreApi = true)]
         [HttpDelete]
-        [Route("v1/people/{father-id:guid}/is-father-of/{child-id:guid}")]
-        public async Task DeletePaternityRelationAsync([FromRoute(Name = "father-id")] Guid fatherId, [FromRoute(Name = "child-id")] Guid childId)
+        [Route("v1/people/{child-id:guid}/father")]
+        public async Task DeletePaternityRelationAsync([FromRoute(Name = "child-id")] Guid childId)
         {
-            await _database.DeletePaternityRelationAsync(fatherId, childId);
+            await _database.DeletePaternityRelationAsync(childId);
         }
         
+        //[ApiExplorerSettings(IgnoreApi = true)]
         [HttpDelete]
-        [Route("v1/people/{mother-id:guid}/is-mother-of/{child-id:guid}")]
-        public async Task DeleteMaternityRelationAsync([FromRoute(Name = "mother-id")] Guid motherId, [FromRoute(Name = "child-id")] Guid childId)
+        [Route("v1/people/{child-id:guid}/mother")]
+        public async Task DeleteMaternityRelationAsync([FromRoute(Name = "child-id")] Guid childId)
         {
-            await _database.DeleteMaternityRelationAsync(motherId, childId);
+            await _database.DeleteMaternityRelationAsync(childId);
         }
         
         /*[HttpPut]

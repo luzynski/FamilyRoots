@@ -16,10 +16,10 @@ namespace FamilyRoots.WebAPI.Persistence
         Task DeletePeopleAsync(IReadOnlyList<Guid> guids);
         Task<Person> GetFatherAsync(Guid childId);
         Task<Person> GetMotherAsync(Guid childId);
-        Task CreatePaternityRelationAsync(Guid fatherId, Guid childId);
-        Task CreateMaternityRelationAsync(Guid motherId, Guid childId);
-        Task DeletePaternityRelationAsync(Guid fatherId, Guid childId);
-        Task DeleteMaternityRelationAsync(Guid motherId, Guid childId);
+        Task CreatePaternityRelationAsync(Guid childId, Guid fatherId);
+        Task CreateMaternityRelationAsync(Guid childId, Guid motherId);
+        Task DeletePaternityRelationAsync(Guid childId);
+        Task DeleteMaternityRelationAsync(Guid childId);
     }
     
     public class GraphDatabase : IGraphDatabase
@@ -94,28 +94,30 @@ namespace FamilyRoots.WebAPI.Persistence
             return result.DefaultIfEmpty(null).Single();
         }
 
-        public async Task CreatePaternityRelationAsync(Guid fatherId, Guid childId)
+        public async Task CreatePaternityRelationAsync(Guid childId, Guid fatherId)
         {
             var query = $"MATCH (f:Person),(c:Person) WHERE f.id = '{fatherId}' AND c.id = '{childId}' " +
-                $"CREATE (f)-[r:IS_FATHER_OF]->(c)";
+                "CREATE (f)-[r:IS_FATHER_OF]->(c)";
             await QueryPeople(query);
         }
 
-        public async Task CreateMaternityRelationAsync(Guid motherId, Guid childId)
+        public async Task CreateMaternityRelationAsync(Guid childId, Guid motherId)
         {
             var query = $"MATCH (m:Person),(c:Person) WHERE m.id = '{motherId}' AND c.id = '{childId}' " +
-                        $"CREATE (m)-[r:IS_MOTHER_OF]->(c)";
+                "CREATE (m)-[r:IS_MOTHER_OF]->(c)";
             await QueryPeople(query);
         }
 
-        public Task DeletePaternityRelationAsync(Guid fatherId, Guid childId)
+        public async Task DeletePaternityRelationAsync(Guid childId)
         {
-            throw new NotImplementedException();
+            var query = $"MATCH (c:Person)<-[r:IS_FATHER_OF]-() WHERE c.id = '{childId}' DELETE r";
+            await QueryPeople(query);
         }
 
-        public Task DeleteMaternityRelationAsync(Guid motherId, Guid childId)
+        public async Task DeleteMaternityRelationAsync(Guid childId)
         {
-            throw new NotImplementedException();
+            var query = $"MATCH (c:Person)<-[r:IS_MOTHER_OF]-() WHERE c.id = '{childId}' DELETE r";
+            await QueryPeople(query);
         }
     }
 }
