@@ -1,28 +1,29 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace FamilyRoots.Data.Requests
 {
-    public class UpdatePersonRequest : IValidatableRequest
+    public class UpdateDeathEventRequest : IValidatableRequest
     {
         public Guid Id { get; set; }
-
-        public string Surname { get; set; }
-
-        public string[] Names { get; set; }
-
+        
+        public Guid PersonId { get; set; }
+        
+        public DateTime? DeathDate { get; set; }
+     
+        public string BurialPlace { get; set; }
+        
         public bool IsValid(out ImmutableArray<string> errors)
         {
             var errorList = new List<string>();
             if (Guid.Empty.Equals(Id))
             {
-                errorList.Add("Updated person id cannot be empty.");
+                errorList.Add("Updated event id cannot be empty.");
             }
-            if (string.IsNullOrWhiteSpace(Surname) && (Names == null || !Names.Any() || !Names.All(string.IsNullOrWhiteSpace)))
+            if (Guid.Empty.Equals(PersonId))
             {
-                errorList.Add("Cannot update surname and all names to blanks.");
+                errorList.Add("Cannot update person id to blank.");
             }
 
             errors = errorList.ToImmutableArray();
