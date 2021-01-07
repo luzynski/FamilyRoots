@@ -1,10 +1,13 @@
 using FamilyRoots.WebAPI.Persistence;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Neo4j.Driver;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using GraphDatabase = FamilyRoots.WebAPI.Persistence.GraphDatabase;
 using IApplicationLifetime = Microsoft.Extensions.Hosting.IApplicationLifetime;
 
@@ -21,8 +24,13 @@ namespace FamilyRoots.WebAPI
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.Formatting = Formatting.Indented;
+                options.SerializerSettings.Converters.Add(new StringEnumConverter());
+            });
             services.AddSwaggerGen();
+            services.AddSwaggerGenNewtonsoftSupport();
             services.AddRouting(options => options.LowercaseUrls = true);
             
             services.AddSingleton(Neo4j.Driver.GraphDatabase.Driver(
@@ -37,15 +45,16 @@ namespace FamilyRoots.WebAPI
             {
                 app.UseDeveloperExceptionPage();
             }
+
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "FamilyRoots API");
                 c.RoutePrefix = string.Empty;
             });
+            
             app.UseHttpsRedirection();
             app.UseRouting();
-            //app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

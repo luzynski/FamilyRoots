@@ -1,9 +1,9 @@
-using System.Collections.Immutable;
+using System.Collections.Generic;
 
 namespace FamilyRoots.Data.Requests
 {
     public interface IValidatableRequest
     {
-        bool IsValid(out ImmutableArray<string> errors);
+        bool IsValid(out IReadOnlyList<string> errors);
     }
 }

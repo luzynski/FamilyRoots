@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
+using System.Linq;
 
 namespace FamilyRoots.Data.Requests
 {
-    public class CreateMarriageEventRequest : IValidatableRequest
+    public class UpsertMarriageEventRequest : IValidatableRequest
     {
+        public Guid? Id { get; set; }
+        
         public Guid FirstSpouseId { get; set; }
         
         public Guid SecondSpouseId { get; set; }
@@ -14,16 +16,20 @@ namespace FamilyRoots.Data.Requests
         
         public DateTime? DivorceDate { get; set; }
         
-        public bool IsValid(out ImmutableArray<string> errors)
+        public bool IsValid(out IReadOnlyList<string> errors)
         {
             var errorList = new List<string>();
+            if (Id.HasValue && Guid.Empty.Equals(Id.Value))
+            {
+                errorList.Add("Event id cannot be empty uuid.");
+            }
             if (Guid.Empty.Equals(FirstSpouseId) || Guid.Empty.Equals(SecondSpouseId))
             {
-                errorList.Add("Both spouse ids has to be set on creation.");
+                errorList.Add("Cannot set spouse ids to empty uuids.");
             }
 
-            errors = errorList.ToImmutableArray();
-            return errors.IsEmpty;
+            errors = errorList;
+            return !errors.Any();
         }
     }
 }

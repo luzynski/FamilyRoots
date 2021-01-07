@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using FamilyRoots.Data;
 using FamilyRoots.Data.Requests;
 using FamilyRoots.WebAPI.Persistence;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace FamilyRoots.WebAPI.Controllers
 {
     [ApiController]
-    [Route("api")]
+    [Route("api/v1/[controller]")]
     public class PeopleController : ControllerBase
     {
         private readonly ILogger<PeopleController> _logger;
@@ -23,90 +24,60 @@ namespace FamilyRoots.WebAPI.Controllers
         }
 
         [HttpGet]
-        [Route("v1/people")]
-        public async Task<IEnumerable<Person>> GetAsync([FromQuery(Name="ids:guid")] IReadOnlyList<Guid> ids)
+        [Route("")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetAsync([FromQuery(Name="ids:guid")] IReadOnlyList<Guid> ids)
         {
-            return await _database.GetPeopleAsync(ids);
+            var storedPeople = await _database.GetPeopleAsync(ids);
+            var missingIds = ids.Except(storedPeople.Select(x => x.Id)).ToList();
+            return missingIds.Any() ? (IActionResult) NotFound(missingIds) : Ok(storedPeople);
         }
 
-        [HttpGet]
-        [Route("v1/people/{child-id:guid}/father")]
-        public async Task<Person> GetFatherAsync([FromRoute(Name = "child-id")] Guid childId)
-        {
-            return await _database.GetFatherAsync(childId);
-        }
-
-        [HttpGet]
-        [Route("v1/people/{child-id:guid}/mother")]
-        public async Task<Person> GetMotherAsync([FromRoute(Name = "child-id")] Guid childId)
-        {
-            return await _database.GetMotherAsync(childId);
-        }
-        
-        [HttpPost]
-        [Route("v1/people")]
-        public async Task<IEnumerable<Person>> Create([FromBody] IReadOnlyList<CreatePersonRequest> newPeople)
-        {
-            return await _database.CreatePeopleAsync(newPeople);
-        }
-        
         [HttpPut]
-        [Route("v1/people")]
-        public async Task<IEnumerable<Person>> Update([FromBody] IReadOnlyList<UpdatePersonRequest> updatedPeople)
+        [Route("")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Update([FromBody] IReadOnlyList<UpsertPersonRequest> peopleToUpsert)
         {
-            return await _database.UpdatePeopleAsync(updatedPeople);
+            var peopleToInsert = peopleToUpsert.Where(x => !x.Id.HasValue).ToList();
+            var peopleToUpdate = peopleToUpsert.Where(x => x.Id.HasValue).ToList();
+            /*var storedPeople = await _database.GetPeopleAsync(peopleToUpdate.Select(x => x.Id.Value).ToList());
+            var missingIds = ids.Except(storedPeople.Select(x => x.Id)).ToList();
+            if (missingIds.Any())
+            {
+                return BadRequest(missingIds);
+            }*/
+            //TODO: add validation - nodes to update has to exist, update node only once
+            var createdPeople = await _database.UpdatePeopleAsync(peopleToInsert);
+            var updatedPeople = await _database.UpdatePeopleAsync(peopleToUpdate);
+            return Ok(createdPeople.Concat(updatedPeople));
         }
         
-        //[ApiExplorerSettings(IgnoreApi = true)]
         [HttpDelete]
-        [Route("v1/people")]
-        public async Task DeleteAsync([FromQuery(Name="ids:guid")] IReadOnlyList<Guid> ids)
+        [Route("")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> DeleteAsync([FromQuery(Name="ids:guid")] IReadOnlyList<Guid> ids)
         {
+            var storedPeople = await _database.GetPeopleAsync(ids);
+            var missingIds = ids.Except(storedPeople.Select(x => x.Id)).ToList();
+            if (missingIds.Any())
+            {
+                return BadRequest(missingIds);
+            }
             await _database.DeletePeopleAsync(ids);
+            return Ok();
         }
         
-        [HttpPost]
-        [Route("v1/people/{child-id:guid}/father/{father-id:guid}")]
-        public async Task CreatePaternityRelationAsync([FromRoute(Name = "father-id")] Guid fatherId, [FromRoute(Name = "child-id")] Guid childId)
-        {
-            await _database.CreatePaternityRelationAsync(fatherId, childId);
-        }
-        
-        [HttpPost]
-        [Route("v1/people/{child-id:guid}/mother/{mother-id:guid}")]
-        public async Task CreateMaternityRelationAsync([FromRoute(Name = "child-id")] Guid childId, [FromRoute(Name = "mother-id")] Guid motherId)
-        {
-            await _database.CreateMaternityRelationAsync(childId, motherId);
-        }
-        
-        //[ApiExplorerSettings(IgnoreApi = true)]
+        [ApiExplorerSettings(IgnoreApi = true)]
         [HttpDelete]
-        [Route("v1/people/{child-id:guid}/father")]
-        public async Task DeletePaternityRelationAsync([FromRoute(Name = "child-id")] Guid childId)
+        [Route("all")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> DeleteAsync()
         {
-            await _database.DeletePaternityRelationAsync(childId);
+            await _database.DeleteAllAsync();
+            return Ok();
         }
-        
-        //[ApiExplorerSettings(IgnoreApi = true)]
-        [HttpDelete]
-        [Route("v1/people/{child-id:guid}/mother")]
-        public async Task DeleteMaternityRelationAsync([FromRoute(Name = "child-id")] Guid childId)
-        {
-            await _database.DeleteMaternityRelationAsync(childId);
-        }
-        
-        /*[HttpPut]
-        [Route("v1/people/{first-party-id:guid}/married/{second-party-id:guid}")]
-        public Person CreateMarriageRelation(Guid firstPartyId, Guid secondPartyId, DateTime? date)
-        {
-            throw new NotImplementedException();
-        }
-        
-        [HttpPut]
-        [Route("v1/people/{first-party-id:guid}/divorced/{second-party-id:guid}")]
-        public Person CreateDivorceRelation(Guid firstPartyId, Guid secondPartyId, DateTime? date)
-        {
-            throw new NotImplementedException();
-        }*/
     }
 }
