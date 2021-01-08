@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FamilyRoots.Data;
 using FamilyRoots.Data.Requests;
 using FamilyRoots.WebAPI.Persistence;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace FamilyRoots.WebAPI.Controllers
 {
@@ -14,12 +14,10 @@ namespace FamilyRoots.WebAPI.Controllers
     [Route("api/v1/[controller]")]
     public class PeopleController : ControllerBase
     {
-        private readonly ILogger<PeopleController> _logger;
         private readonly IGraphDatabase _database;
         
-        public PeopleController(ILogger<PeopleController> logger, IGraphDatabase database)
+        public PeopleController(IGraphDatabase database)
         {
-            _logger = logger;
             _database = database;
         }
 
@@ -29,6 +27,10 @@ namespace FamilyRoots.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetAsync([FromQuery(Name="ids:guid")] IReadOnlyList<Guid> ids)
         {
+            if (!ids.Any())
+            {
+                return Ok(Enumerable.Empty<Person>());
+            }
             var storedPeople = await _database.GetPeopleAsync(ids);
             var missingIds = ids.Except(storedPeople.Select(x => x.Id)).ToList();
             return missingIds.Any() ? (IActionResult) NotFound(missingIds) : Ok(storedPeople);
@@ -60,6 +62,10 @@ namespace FamilyRoots.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> DeleteAsync([FromQuery(Name="ids:guid")] IReadOnlyList<Guid> ids)
         {
+            if (!ids.Any())
+            {
+                return Ok();
+            }
             var storedPeople = await _database.GetPeopleAsync(ids);
             var missingIds = ids.Except(storedPeople.Select(x => x.Id)).ToList();
             if (missingIds.Any())

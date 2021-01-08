@@ -1,20 +1,39 @@
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 
 namespace FamilyRoots.WebAPI
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            Log.Logger = new LoggerConfiguration()
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
+                .CreateLogger();
+
+            using var host = CreateHost(args);
+            await host.RunAsync();
         }
 
-        private static IHostBuilder CreateHostBuilder(string[] args)
+        private static IHost CreateHost(string[] args)
         {
-            return Host
+            var builder = Host
                 .CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>());
+                .ConfigureWebHostDefaults(webBuilder => webBuilder
+                    .UseStartup<Startup>()
+                    .UseSerilog()
+                    .UseKestrel(options =>
+                    {
+                        options.Limits.MinResponseDataRate = null;
+                        options.Limits.MaxResponseBufferSize = 4 * 1024 * 1024;
+                        options.Limits.MaxRequestBodySize = null;
+                        options.AllowSynchronousIO = true;
+                    }));
+
+            return builder.Build();
         }
     }
 }

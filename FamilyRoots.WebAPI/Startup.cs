@@ -1,15 +1,14 @@
 using FamilyRoots.WebAPI.Persistence;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Neo4j.Driver;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Serilog;
 using GraphDatabase = FamilyRoots.WebAPI.Persistence.GraphDatabase;
-using IApplicationLifetime = Microsoft.Extensions.Hosting.IApplicationLifetime;
 
 namespace FamilyRoots.WebAPI
 {
@@ -26,6 +25,7 @@ namespace FamilyRoots.WebAPI
         {
             services.AddControllers().AddNewtonsoftJson(options =>
             {
+                options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                 options.SerializerSettings.Formatting = Formatting.Indented;
                 options.SerializerSettings.Converters.Add(new StringEnumConverter());
             });
@@ -41,6 +41,7 @@ namespace FamilyRoots.WebAPI
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseSerilogRequestLogging();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -55,9 +56,9 @@ namespace FamilyRoots.WebAPI
             
             app.UseHttpsRedirection();
             app.UseRouting();
-            app.UseEndpoints(endpoints =>
+            app.UseEndpoints(builder =>
             {
-                endpoints.MapControllers();
+                builder.MapControllers();
             });
         }
     }
