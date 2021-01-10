@@ -12,19 +12,19 @@ namespace FamilyRoots.WebAPI.Persistence
     public interface IGraphDatabase
     {
         Task<IEnumerable<Person>> GetPeopleAsync();
-        Task<IEnumerable<Person>> GetPeopleAsync(IReadOnlyList<Guid> guids);
-        Task<IEnumerable<Person>> CreatePeopleAsync(IReadOnlyList<UpsertPersonRequest> newPeople);
-        Task<IEnumerable<Person>> UpdatePeopleAsync(IReadOnlyList<UpsertPersonRequest> updatedPeople);
-        Task DeletePeopleAsync(IReadOnlyList<Guid> guids);
+        Task<IEnumerable<Person>> GetPeopleAsync(IList<Guid> guids);
+        Task<IEnumerable<Person>> CreatePeopleAsync(IList<UpsertPersonRequest> newPeople);
+        Task<IEnumerable<Person>> UpdatePeopleAsync(IList<UpsertPersonRequest> updatedPeople);
+        Task DeletePeopleAsync(IList<Guid> guids);
         Task DeleteAllAsync();
-        Task<IEnumerable<Event>> GetEventsAsync(Type birth, IReadOnlyList<Guid> ids);
-        Task<IEnumerable<BirthEvent>> CreateBirthEventsAsync(IReadOnlyList<UpsertBirthEventRequest> newBirthEvents);
-        Task<IEnumerable<BirthEvent>> UpdateBirthEventsAsync(IReadOnlyList<UpsertBirthEventRequest> updatedBirthEvents);
-        Task<IEnumerable<DeathEvent>> CreateDeathEventsAsync(IReadOnlyList<UpsertBirthEventRequest> newDeathEvents);
-        Task<IEnumerable<DeathEvent>> UpdateDeathEventsAsync(IReadOnlyList<UpsertDeathEventRequest> updatedDeathEvents);
-        Task<IEnumerable<MarriageEvent>> CreateMarriageEventsAsync(IReadOnlyList<UpsertBirthEventRequest> newMarriageEvents);
-        Task<IEnumerable<MarriageEvent>> UpdateMarriageEventsAsync(IReadOnlyList<UpsertMarriageEventRequest> updatedMarriageEvents);
-        Task DeleteEventsAsync(Type birth, IReadOnlyList<Guid> ids);
+        Task<IEnumerable<Event>> GetEventsAsync(Type birth, IList<Guid> ids);
+        Task<IEnumerable<BirthEvent>> CreateBirthEventsAsync(IList<UpsertBirthEventRequest> newBirthEvents);
+        Task<IEnumerable<BirthEvent>> UpdateBirthEventsAsync(IList<UpsertBirthEventRequest> updatedBirthEvents);
+        Task<IEnumerable<DeathEvent>> CreateDeathEventsAsync(IList<UpsertBirthEventRequest> newDeathEvents);
+        Task<IEnumerable<DeathEvent>> UpdateDeathEventsAsync(IList<UpsertDeathEventRequest> updatedDeathEvents);
+        Task<IEnumerable<MarriageEvent>> CreateMarriageEventsAsync(IList<UpsertBirthEventRequest> newMarriageEvents);
+        Task<IEnumerable<MarriageEvent>> UpdateMarriageEventsAsync(IList<UpsertMarriageEventRequest> updatedMarriageEvents);
+        Task DeleteEventsAsync(Type birth, IList<Guid> ids);
     }
     
     public class GraphDatabase : IGraphDatabase
@@ -63,7 +63,7 @@ namespace FamilyRoots.WebAPI.Persistence
             return await QueryPeople(query);
         }
         
-        public async Task<IEnumerable<Person>> GetPeopleAsync(IReadOnlyList<Guid> ids)
+        public async Task<IEnumerable<Person>> GetPeopleAsync(IList<Guid> ids)
         {
             if (ids == null || !ids.Any())
             {
@@ -73,12 +73,12 @@ namespace FamilyRoots.WebAPI.Persistence
             return await QueryPeople(query);
         }
 
-        public async Task<IEnumerable<Person>> CreatePeopleAsync(IReadOnlyList<UpsertPersonRequest> newPeople)
+        public async Task<IEnumerable<Person>> CreatePeopleAsync(IList<UpsertPersonRequest> newPeople)
         {
             return await QueryPeople(newPeople.Select(x => x.ToCypherCreateQuery()).ToArray());
         }
         
-        public async Task<IEnumerable<Person>> UpdatePeopleAsync(IReadOnlyList<UpsertPersonRequest> updatedPeople)
+        public async Task<IEnumerable<Person>> UpdatePeopleAsync(IList<UpsertPersonRequest> updatedPeople)
         {
             return await QueryPeople(updatedPeople.Select(x => x.ToCypherUpdateQuery()).ToArray());
         }
@@ -90,47 +90,47 @@ namespace FamilyRoots.WebAPI.Persistence
             await QueryPeople(query);
         }
 
-        public Task<IEnumerable<Event>> GetEventsAsync(Type birth, IReadOnlyList<Guid> ids)
+        public Task<IEnumerable<Event>> GetEventsAsync(Type birth, IList<Guid> ids)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<BirthEvent>> CreateBirthEventsAsync(IReadOnlyList<UpsertBirthEventRequest> newBirthEvents)
+        public Task<IEnumerable<BirthEvent>> CreateBirthEventsAsync(IList<UpsertBirthEventRequest> newBirthEvents)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<BirthEvent>> UpdateBirthEventsAsync(IReadOnlyList<UpsertBirthEventRequest> updatedBirthEvents)
+        public Task<IEnumerable<BirthEvent>> UpdateBirthEventsAsync(IList<UpsertBirthEventRequest> updatedBirthEvents)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<DeathEvent>> CreateDeathEventsAsync(IReadOnlyList<UpsertBirthEventRequest> newDeathEvents)
+        public Task<IEnumerable<DeathEvent>> CreateDeathEventsAsync(IList<UpsertBirthEventRequest> newDeathEvents)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<DeathEvent>> UpdateDeathEventsAsync(IReadOnlyList<UpsertDeathEventRequest> updatedDeathEvents)
+        public Task<IEnumerable<DeathEvent>> UpdateDeathEventsAsync(IList<UpsertDeathEventRequest> updatedDeathEvents)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<MarriageEvent>> CreateMarriageEventsAsync(IReadOnlyList<UpsertBirthEventRequest> newMarriageEvents)
+        public Task<IEnumerable<MarriageEvent>> CreateMarriageEventsAsync(IList<UpsertBirthEventRequest> newMarriageEvents)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<MarriageEvent>> UpdateMarriageEventsAsync(IReadOnlyList<UpsertMarriageEventRequest> updatedMarriageEvents)
+        public Task<IEnumerable<MarriageEvent>> UpdateMarriageEventsAsync(IList<UpsertMarriageEventRequest> updatedMarriageEvents)
         {
             throw new NotImplementedException();
         }
 
-        public Task DeleteEventsAsync(Type birth, IReadOnlyList<Guid> ids)
+        public Task DeleteEventsAsync(Type birth, IList<Guid> ids)
         {
             throw new NotImplementedException();
         }
 
-        public async Task DeletePeopleAsync(IReadOnlyList<Guid> ids)
+        public async Task DeletePeopleAsync(IList<Guid> ids)
         {
             if (ids == null || !ids.Any())
             {

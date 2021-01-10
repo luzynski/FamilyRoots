@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using Serilog.Events;
 
 namespace FamilyRoots.WebAPI
 {
@@ -10,6 +11,7 @@ namespace FamilyRoots.WebAPI
         public static async Task Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning) 
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
                 .CreateLogger();

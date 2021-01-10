@@ -7,12 +7,13 @@ using FamilyRoots.Data.Requests;
 using FamilyRoots.WebAPI.Persistence;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace FamilyRoots.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]
-    public class PeopleController : ControllerBase
+    public class PeopleController : Controller
     {
         private readonly IGraphDatabase _database;
         
@@ -24,34 +25,35 @@ namespace FamilyRoots.WebAPI.Controllers
         [HttpGet]
         [Route("")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetAsync([FromQuery(Name="ids:guid")] IReadOnlyList<Guid> ids)
+        public async Task<IActionResult> GetAsync([FromQuery(Name="ids:guid")] IList<Guid> ids,
+            [FromServices] IOptions<ApiBehaviorOptions> apiBehaviorOptions)
         {
             if (!ids.Any())
             {
                 return Ok(Enumerable.Empty<Person>());
             }
             var storedPeople = await _database.GetPeopleAsync(ids);
-            var missingIds = ids.Except(storedPeople.Select(x => x.Id)).ToList();
-            return missingIds.Any() ? (IActionResult) NotFound(missingIds) : Ok(storedPeople);
+            return Ok(storedPeople);
         }
 
         [HttpPut]
         [Route("")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Update([FromBody] IReadOnlyList<UpsertPersonRequest> peopleToUpsert)
+        public async Task<IActionResult> Update([FromBody] ICollection<UpsertPersonRequest> peopleToUpsert,
+            [FromServices] IOptions<ApiBehaviorOptions> apiBehaviorOptions)
         {
             var peopleToInsert = peopleToUpsert.Where(x => !x.Id.HasValue).ToList();
             var peopleToUpdate = peopleToUpsert.Where(x => x.Id.HasValue).ToList();
-            /*var storedPeople = await _database.GetPeopleAsync(peopleToUpdate.Select(x => x.Id.Value).ToList());
-            var missingIds = ids.Except(storedPeople.Select(x => x.Id)).ToList();
+            var peopleToUpdateIds = peopleToUpdate.Select(x => x.Id.Value).ToList();
+            var storedPeople = await _database.GetPeopleAsync(peopleToUpdateIds);
+            var missingIds = peopleToUpdateIds.Except(storedPeople.Select(x => x.Id)).ToList();
             if (missingIds.Any())
             {
-                return BadRequest(missingIds);
-            }*/
-            //TODO: add validation - nodes to update has to exist, update node only once
-            var createdPeople = await _database.UpdatePeopleAsync(peopleToInsert);
+                return CreateMissingObjectsResponse(apiBehaviorOptions, missingIds,
+                    peopleToUpsert.Select(x => x.Id ?? Guid.Empty).ToList(), "Updated person id does not exist.");
+            }
+            var createdPeople = await _database.CreatePeopleAsync(peopleToInsert);
             var updatedPeople = await _database.UpdatePeopleAsync(peopleToUpdate);
             return Ok(createdPeople.Concat(updatedPeople));
         }
@@ -60,7 +62,8 @@ namespace FamilyRoots.WebAPI.Controllers
         [Route("")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> DeleteAsync([FromQuery(Name="ids:guid")] IReadOnlyList<Guid> ids)
+        public async Task<IActionResult> DeleteAsync([FromQuery(Name="ids:guid")] IList<Guid> ids,
+            [FromServices] IOptions<ApiBehaviorOptions> apiBehaviorOptions)
         {
             if (!ids.Any())
             {
@@ -70,7 +73,7 @@ namespace FamilyRoots.WebAPI.Controllers
             var missingIds = ids.Except(storedPeople.Select(x => x.Id)).ToList();
             if (missingIds.Any())
             {
-                return BadRequest(missingIds);
+                return CreateMissingObjectsResponse(apiBehaviorOptions, missingIds, ids, "Deleted person id does not exist.");
             }
             await _database.DeletePeopleAsync(ids);
             return Ok();
