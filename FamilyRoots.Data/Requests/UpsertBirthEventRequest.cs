@@ -5,7 +5,6 @@ namespace FamilyRoots.Data.Requests
 {
     public class UpsertBirthEventRequest
     {
-        
         [GuidNotEmpty]
         public Guid? Id { get; set; }
         
