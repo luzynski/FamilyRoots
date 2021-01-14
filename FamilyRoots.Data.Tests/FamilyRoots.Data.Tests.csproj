@@ -15,8 +15,4 @@
     <ProjectReference Include="..\FamilyRoots.Data\FamilyRoots.Data.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Requests" />
-  </ItemGroup>
-
 </Project>

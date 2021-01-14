@@ -18,7 +18,7 @@ namespace FamilyRoots.Data.Validation
             {
                 if (array.Any(string.IsNullOrWhiteSpace))
                 {
-                    return new ValidationResult("Array cannot have null, empty or white spaces only values.");
+                    return new ValidationResult("Array cannot have values that are null, empty or white spaces only.");
                 }
             }
             return ValidationResult.Success;
