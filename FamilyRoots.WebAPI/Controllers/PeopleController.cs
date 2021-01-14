@@ -25,12 +25,13 @@ namespace FamilyRoots.WebAPI.Controllers
         [HttpGet]
         [Route("")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> GetAsync([FromQuery(Name="ids:guid")] IList<Guid> ids,
             [FromServices] IOptions<ApiBehaviorOptions> apiBehaviorOptions)
         {
             if (!ids.Any())
             {
-                return Ok(Enumerable.Empty<Person>());
+                return NoContent();
             }
             var storedPeople = await _database.GetPeopleAsync(ids);
             return Ok(storedPeople);
@@ -39,10 +40,15 @@ namespace FamilyRoots.WebAPI.Controllers
         [HttpPut]
         [Route("")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Update([FromBody] ICollection<UpsertPersonRequest> peopleToUpsert,
             [FromServices] IOptions<ApiBehaviorOptions> apiBehaviorOptions)
         {
+            if (!peopleToUpsert.Any())
+            {
+                return NoContent();
+            }
             var peopleToInsert = peopleToUpsert.Where(x => !x.Id.HasValue).ToList();
             var peopleToUpdate = peopleToUpsert.Where(x => x.Id.HasValue).ToList();
             var peopleToUpdateIds = peopleToUpdate.Select(x => x.Id.Value).ToList();
@@ -60,14 +66,14 @@ namespace FamilyRoots.WebAPI.Controllers
         
         [HttpDelete]
         [Route("")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> DeleteAsync([FromQuery(Name="ids:guid")] IList<Guid> ids,
             [FromServices] IOptions<ApiBehaviorOptions> apiBehaviorOptions)
         {
             if (!ids.Any())
             {
-                return Ok();
+                return NoContent();
             }
             var storedPeople = await _database.GetPeopleAsync(ids);
             var missingIds = ids.Except(storedPeople.Select(x => x.Id)).ToList();
@@ -76,17 +82,17 @@ namespace FamilyRoots.WebAPI.Controllers
                 return CreateMissingObjectsResponse(apiBehaviorOptions, missingIds, ids, "Deleted person id does not exist.");
             }
             await _database.DeletePeopleAsync(ids);
-            return Ok();
+            return NoContent();
         }
         
         [ApiExplorerSettings(IgnoreApi = true)]
         [HttpDelete]
         [Route("all")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> DeleteAsync()
         {
             await _database.DeleteAllAsync();
-            return Ok();
+            return NoContent();
         }
     }
 }
